@@ -1,10 +1,10 @@
 <template>
-  <router-view />
+  <div>answer to bottom</div>
 </template>
 
 <script>
 export default {
-  name: 'App',
+  name: 'answerToBottom',
   components: {
     
   },
