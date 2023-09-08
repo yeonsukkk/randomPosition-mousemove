@@ -5,7 +5,8 @@
     :style="{
       boxShadow: mouseFlag ? '2px 2px 6px #bbb': '1px 1px 2px #bbb',
       zIndex: mouseFlag ? '10000' : '100',
-      'transform': `translate(${setPosition.x}px, ${setPosition.y}px)`
+      left: `${setPosition.x}px`,
+      top: `${setPosition.y}px`,
     }"
     ref="item"
     @mousedown="startDrag($event, this.$refs.item)"
@@ -26,7 +27,6 @@ export default {
   emits: [
     'childItem',
     'startDrag',
-    'style'
   ],
   computed: {
     setPosition: function() {
@@ -79,43 +79,17 @@ export default {
 
       this.moveAt(e.pageX, e.pageY)
     },
-    moveAt(pageX, pageY) { // 마우스 무브 이벤트 값에 따라 translate값 바꾸기
+    moveAt(pageX, pageY) {
       if(this.mouseFlag) {
-        const x = pageX - this.shift.x - this.parentInfo.x
-        const y = pageY - this.shift.y - this.parentInfo.y
-        this.answerCheck('style')
+        const x = pageX - this.shift.x
+        const y = pageY - this.shift.y
+
         return {x, y}
       }
     },
     endDrag() {
       this.mouseFlag = false
-      this.answerCheck('isCorrect')
       this.startDragFlag(this.mouseFlag)
-    },
-    answerCheck(type) { // 하단 정답 영역에 들어왔는지 체크
-      const item = this.itemTag
-      const { bottom, left, width } = item.getBoundingClientRect()
-      const { innerWidth, innerHeight } = window
-
-      if(bottom >= innerHeight - 80) {
-        if(type === 'style') { // 정답 영역에 스타일 주기 위함
-          const stylePosition = {
-            isIn: false,
-            isSide: null,
-          }
-          stylePosition.isIn = true
-          if(left + (width / 2) <= innerWidth / 2) { // 왼쪽 영역
-            stylePosition.isSide = 'left'
-          } else { // 오른쪽 영역
-            stylePosition.isSide = 'right'
-          }
-          this.$emit('style', stylePosition)
-        } else if (type === 'isCorrect') { // 정답 체크하기 위함
-
-        }
-      } else {
-        // console.log('나가따')
-      }
     },
   },
 }

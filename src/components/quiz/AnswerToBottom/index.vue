@@ -14,6 +14,7 @@
         ref="item"
         @childItem="getChildItem"
         @startDrag="startDrag"
+        @style="getStyle"
         :getPosition="getChildItem"
         :moveMouse="moveMouse"
         :item-info="{
@@ -21,7 +22,9 @@
           parentPosition: parentMousePosition,
         }"
       />
-      <Footer />
+      <Footer
+        :getStyle="answerStyle"
+      />
     </div>
     <DetailInfo
       :detail-info="detailInfo"
@@ -79,6 +82,7 @@ export default {
           y: 0,
         },
       },
+      answerStyle: null,
     }
   },
   computed: {
@@ -138,6 +142,9 @@ export default {
       this.parentMousePosition.page.x = e.pageX
       this.parentMousePosition.page.y = e.pageY
     },
+    getStyle(value) { // 하단 정답 영역에 필요한 스타일
+      this.answerStyle = value
+    }
   },
 }
 </script>
