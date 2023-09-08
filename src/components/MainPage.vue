@@ -23,11 +23,11 @@ export default {
       list: [
         {
           name: '하단 정답으로 이동 유형',
-          link: 'AnswerToBottom',
+          link: 'answerToBottom',
         },
         {
           name: '영역 선택 유형',
-          link: '',
+          link: 'selectArea',
         },
       ],
     }
@@ -36,7 +36,7 @@ export default {
     goToPage(path) {
       if(!path) return alert('준비 중입니다.')
       this.$router.push({
-        path
+        path: `/quiz/${path}`
       })
     },
   },
