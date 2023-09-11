@@ -1,7 +1,7 @@
 <template>
   <p
     v-if="isLoaded"
-    class="inline-block bg-[#f1f1f1] p-[0.5em] leading-[2] cursor-pointer absolute z-[100] select-none transition-shadow duration-150"
+    class="inline-block bg-[#f1f1f1] p-[0.5em] leading-[2] cursor-pointer absolute z-[100] select-none overflow-hidden transition-shadow duration-150"
     :style="{
       boxShadow: mouseFlag ? '2px 2px 6px #bbb': '1px 1px 2px #bbb',
       zIndex: mouseFlag ? '10000' : '100',
@@ -10,11 +10,16 @@
     ref="item"
     @mousedown="startDrag($event, this.$refs.item)"
     @mouseup="endDrag"
+    @touchstart="startDrag($event, this.$refs.item)"
+    @touchend="endDrag"
   >
-    {{this.itemInfo.itemName}}
+    {{itemInfo.item.name}}
   </p>
 </template>
 <script>
+import { mapStores, setMapStoreSuffix } from 'pinia'
+import { useQuiz } from '@/store/quizInfo'
+setMapStoreSuffix('')
 export default {
   name:'answerToBottom Item',
   props: {
@@ -26,9 +31,10 @@ export default {
   emits: [
     'childItem',
     'startDrag',
-    'style'
+    'getStyle',
   ],
   computed: {
+    ...mapStores(useQuiz),
     setPosition: function() {
       return this.mouseFlag && this.moveAt(this.itemInfo.parentPosition.page.x, this.itemInfo.parentPosition.page.y)
     },
@@ -74,16 +80,18 @@ export default {
       this.startDragFlag(this.mouseFlag)
       this.moveMouse(e) // 마우스 이벤트 발생시 초기 위치값 설정해주기
       const containerMargin = (window.innerWidth - this.containerSize.width) / 2
-      this.shift.x = e.pageX - (target.getBoundingClientRect().left - containerMargin)
-      this.shift.y = e.pageY - (target.getBoundingClientRect().top - 50)
+      const pageX = e.type === 'touchstart' ? e.changedTouches[0].pageX : e.pageX
+      const pageY = e.type === 'touchstart' ? e.changedTouches[0].pageY : e.pageY
+      this.shift.x = pageX - (target.getBoundingClientRect().left - containerMargin)
+      this.shift.y = pageY - (target.getBoundingClientRect().top - 50)
 
-      this.moveAt(e.pageX, e.pageY)
+      this.moveAt(pageX, pageY)
     },
     moveAt(pageX, pageY) { // 마우스 무브 이벤트 값에 따라 translate값 바꾸기
+      this.itemTag.style.removeProperty?.('transition') // 기존 transition 없애기
       if(this.mouseFlag) {
         const x = pageX - this.shift.x - this.parentInfo.x
         const y = pageY - this.shift.y - this.parentInfo.y
-        this.answerCheck('style')
         return {x, y}
       }
     },
@@ -92,29 +100,67 @@ export default {
       this.answerCheck('isCorrect')
       this.startDragFlag(this.mouseFlag)
     },
-    answerCheck(type) { // 하단 정답 영역에 들어왔는지 체크
+    answerCheck() { // 하단 정답 영역에 들어왔는지 체크
+      const answerType = this.itemInfo.item.answerType
       const item = this.itemTag
       const { bottom, left, width } = item.getBoundingClientRect()
       const { innerWidth, innerHeight } = window
+      const stylePosition = {
+        isIn: false,
+        isSide: null,
+      }
+      this.itemTag.style.transition = 'all 0.5s'
 
       if(bottom >= innerHeight - 80) {
-        if(type === 'style') { // 정답 영역에 스타일 주기 위함
-          const stylePosition = {
-            isIn: false,
-            isSide: null,
+        // console.log('들어와따')
+        stylePosition.isIn = true
+        if(left + (width / 2) <= innerWidth / 2) { // 왼쪽 영역
+          stylePosition.isSide = 'left'
+          if(answerType === 'increase') { // 정답일 경우
+            this.itemTag.style.backgroundColor = '#4caf50'
+            setTimeout(() => {
+              this.itemTag.style.width = 0
+              this.itemTag.style.height = 0
+              this.itemTag.style.padding = 0
+              this.quizList.isCorrect.increase = [...this.quizList.isCorrect.increase, this.itemTag.innerHTML]
+              setTimeout(() => {
+                this.itemTag.style.display = 'none'
+              }, 500)
+            }, 600)
+          } else {
+            this.itemTag.style.backgroundColor = '#f44336'
+            this.itemTag.style.transform = 'translate(0, 0)'
+            setTimeout(() => {
+              this.itemTag.style.backgroundColor = '#f1f1f1'
+            }, 500)
           }
-          stylePosition.isIn = true
-          if(left + (width / 2) <= innerWidth / 2) { // 왼쪽 영역
-            stylePosition.isSide = 'left'
-          } else { // 오른쪽 영역
-            stylePosition.isSide = 'right'
+        } else { // 오른쪽 영역
+          stylePosition.isSide = 'right'
+          if(answerType === 'decrease') { // 정답일 경우
+            this.itemTag.style.backgroundColor = '#4caf50'
+            setTimeout(() => {
+              this.itemTag.style.width = 0
+              this.itemTag.style.height = 0
+              this.itemTag.style.padding = 0
+              this.quizList.isCorrect.decrease = [...this.quizList.isCorrect.decrease, this.itemTag.innerHTML]
+              setTimeout(() => {
+                this.itemTag.style.display = 'none'
+              }, 500)
+            }, 600)
+          } else {
+            this.itemTag.style.backgroundColor = '#f44336'
+            this.itemTag.style.transform = 'translate(0, 0)'
+            setTimeout(() => {
+              this.itemTag.style.backgroundColor = '#f1f1f1'
+            }, 500)
           }
-          this.$emit('style', stylePosition)
-        } else if (type === 'isCorrect') { // 정답 체크하기 위함
-
         }
+        this.$emit('getStyle', stylePosition)
       } else {
         // console.log('나가따')
+        stylePosition.isIn = false
+        stylePosition.isSide = null
+        this.$emit('getStyle', stylePosition)
       }
     },
   },

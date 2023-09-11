@@ -3,6 +3,7 @@
     class="relative w-full h-[calc(100vh_-_50px)] flex justify-center items-center top-[50px] overflow-hidden"
     v-if="isLoaded"
     @mousemove="moveMouse($event)"
+    @touchmove="moveMouse($event)"
   >
     <div
       class="w-[665px] max-w-[95%] h-full relative z-10"
@@ -14,16 +15,16 @@
         ref="item"
         @childItem="getChildItem"
         @startDrag="startDrag"
-        @style="getStyle"
+        @getStyle="getStyle"
         :getPosition="getChildItem"
         :moveMouse="moveMouse"
         :item-info="{
-          itemName: item,
+          item,
           parentPosition: parentMousePosition,
         }"
       />
       <Footer
-        :getStyle="answerStyle"
+        :answerStyle="answerStyle"
       />
     </div>
     <DetailInfo
@@ -53,12 +54,12 @@ export default {
     return {
       isLoaded: false,
       mokupData: {
-        correct: [
+        increase: [
           'wins',
           'gains',
           'add',
         ],
-        wrong: [
+        decrease: [
           'subtract',
           'reduces',
           'loses',
@@ -82,7 +83,10 @@ export default {
           y: 0,
         },
       },
-      answerStyle: null,
+      answerStyle: {
+        isIn: false,
+        isSide: null, 
+      },
     }
   },
   computed: {
@@ -91,13 +95,25 @@ export default {
   mounted() {
     this.isLoaded = this.detailInfo && true
     this.getItemList(this.mokupData)
+    this.quizList.isCorrect.increase = []
+    this.quizList.isCorrect.decrease = []
   },
   methods: {
     getItemList(itemList) {
-      for(const item in itemList) {
+      // for(const item in itemList) { // 배열로 담기
+      //   const getItem = itemList[item]
+      //   for(const i in getItem) {
+      //     this.itemList = [...this.itemList, getItem[i]]
+      //   }
+      // }
+      for(const item in itemList) { // 객체로 담기
         const getItem = itemList[item]
         for(const i in getItem) {
-          this.itemList = [...this.itemList, getItem[i]]
+          const _getItem = {
+            name: getItem[i],
+            answerType: item
+          }
+          this.itemList = [...this.itemList, _getItem]
         }
       }
       this.shuffledItemList(this.itemList)
@@ -138,9 +154,11 @@ export default {
     },
     moveMouse(e) {
       if(!this.dragFlag) return
+      const pageX = e.type === 'touchmove' ? e.changedTouches[0].pageX : e.pageX
+      const pageY = e.type === 'touchmove' ? e.changedTouches[0].pageY : e.pageY
 
-      this.parentMousePosition.page.x = e.pageX
-      this.parentMousePosition.page.y = e.pageY
+      this.parentMousePosition.page.x = pageX
+      this.parentMousePosition.page.y = pageY
     },
     getStyle(value) { // 하단 정답 영역에 필요한 스타일
       this.answerStyle = value

@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
 
 export const  useQuiz = defineStore('quizList', () => {
+  const isCorrect = {
+    increase: [],
+    decrease: [],
+  }
   function getQuizList(path) {
     const quizInfo = {
       title: '',
@@ -22,6 +26,7 @@ export const  useQuiz = defineStore('quizList', () => {
   }
 
   return {
+    isCorrect,
     getQuizList,
   }
 })
