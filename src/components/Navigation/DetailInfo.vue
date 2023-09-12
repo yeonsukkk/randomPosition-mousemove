@@ -1,19 +1,17 @@
 <template>
-  <div
-    class="fixed top-[10px] right-[10px] z-20"
-  >
+  <div class="relative">
     <button
       type="button"
       class="text-[12px] text-slate-700 leading-[30px] w-[70px] rounded-[40px] bg-[#E5E5E5]"
       ref="modalToggle"
     >Info</button>
     <div
-      class="w-[400px] fixed t-[10px] right-[10px] pt-[10px]"
+      class="w-[400px] absolute t-[100%] right-0 pt-[10px]"
       ref="modalContent"
       v-if="modalFlag"
     >
       <div
-        class="w-full h-full p-4 border-2 border-[#808080] bg-white rounded-2xl"
+        class="w-full h-full p-4 border border-[#808080] bg-white rounded-2xl"
       >
         <h2 class="font-bold text-black text-[17px] mb-[2px]">{{ detailInfo.title }}</h2>
         <div class="flex w-full">

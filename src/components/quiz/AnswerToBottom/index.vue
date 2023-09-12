@@ -1,7 +1,7 @@
 <template>
   <div
-    class="relative w-full h-[calc(100vh_-_50px)] flex justify-center items-center top-[50px] overflow-hidden"
     v-if="isLoaded"
+    class="relative w-full h-[calc(100vh_-_50px)] flex justify-center items-center top-[50px] overflow-hidden"
     @mousemove="moveMouse($event)"
     @touchmove="moveMouse($event)"
   >
@@ -27,9 +27,6 @@
         :answerStyle="answerStyle"
       />
     </div>
-    <DetailInfo
-      :detail-info="detailInfo"
-    />
   </div>
 </template>
 
@@ -39,16 +36,13 @@ import { useQuiz } from '@/store/quizInfo'
 setMapStoreSuffix('')
 import Item from './Item.vue'
 import Footer from './Footer.vue'
-import DetailInfo from '@/components/quiz/DetailInfo.vue'
 export default {
   name: 'answerToBottom',
   components: {
-    DetailInfo,
     Item,
     Footer,
   },
   props: {
-    detailInfo: Object,
   },
   data() {
     return {
@@ -93,7 +87,7 @@ export default {
     ...mapStores(useQuiz),
   },
   mounted() {
-    this.isLoaded = this.detailInfo && true
+    this.isLoaded = true
     this.getItemList(this.mokupData)
     this.quizList.isCorrect.increase = []
     this.quizList.isCorrect.decrease = []
